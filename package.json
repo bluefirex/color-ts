@@ -1,0 +1,27 @@
+{
+  "name": "@bluefirex/color-ts",
+  "version": "1.0.0",
+  "description": "A color manipulation library for TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "/dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluefirex/color-ts.git"
+  },
+  "keywords": [
+    "color",
+    "typescript"
+  ],
+  "author": "bluefirex <github@bfx.re>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bluefirex/color-ts/issues"
+  },
+  "homepage": "https://github.com/bluefirex/color-ts#readme"
+}
