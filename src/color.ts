@@ -525,9 +525,9 @@ export class Color {
 	/**
 	 * Get the RGB values as a numbers array [R, G, B]
 	 *
-	 * @returns {number[]}
+	 * @returns {[number, number, number]}
 	 */
-	public get rgbArray(): number[] {
+	public get rgbArray(): [number, number, number] {
 		return [
 			this.rgb.r,
 			this.rgb.g,
@@ -564,9 +564,9 @@ export class Color {
 	/**
 	 * Get the HSL values as a numbers array [H, S, L]
 	 *
-	 * @returns {number[]}
+	 * @returns {[number, number, number]}
 	 */
-	public get hslArray(): number[] {
+	public get hslArray(): [number, number, number] {
 		return [
 			this.hsl.h,
 			this.hsl.s,
