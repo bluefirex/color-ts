@@ -256,9 +256,9 @@ export declare class Color {
     /**
      * Get the RGB values as a numbers array [R, G, B]
      *
-     * @returns {number[]}
+     * @returns {[number, number, number]}
      */
-    get rgbArray(): number[];
+    get rgbArray(): [number, number, number];
     /**
      * Get as HSL object
      * @returns {HSL}
@@ -273,9 +273,9 @@ export declare class Color {
     /**
      * Get the HSL values as a numbers array [H, S, L]
      *
-     * @returns {number[]}
+     * @returns {[number, number, number]}
      */
-    get hslArray(): number[];
+    get hslArray(): [number, number, number];
     protected calculateHex(): void;
     protected calculateRGB(): void;
     protected calculateHSL(): void;

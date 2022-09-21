@@ -417,7 +417,7 @@ export class Color {
     /**
      * Get the RGB values as a numbers array [R, G, B]
      *
-     * @returns {number[]}
+     * @returns {[number, number, number]}
      */
     get rgbArray() {
         return [
@@ -452,7 +452,7 @@ export class Color {
     /**
      * Get the HSL values as a numbers array [H, S, L]
      *
-     * @returns {number[]}
+     * @returns {[number, number, number]}
      */
     get hslArray() {
         return [
