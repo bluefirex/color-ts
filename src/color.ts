@@ -632,8 +632,8 @@ export class Color {
 		let finalHex = ''
 		
 		for (let i = 0; i <= 5; i += 2) {
-			let value1 = parseInt(color1.hex.substring(0, 2), 16),
-				value2 = parseInt(color2.hex.substring(0, 2), 16)
+			let value1 = parseInt(color1.hex.substring(i, i + 2), 16),
+				value2 = parseInt(color2.hex.substring(i, i + 2), 16)
 			
 			// Combine a pair of color components (first r, then g, then b) mathematically
 			let combinedValue = Math.floor(value2 + (value1 - value2) * (weight / 100.0)),
