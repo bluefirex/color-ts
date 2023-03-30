@@ -152,6 +152,7 @@ const rgba = color.cssRGBA
 
 // RGB as an object or array
 const rgbArray = color.rgbArray,
+    rgbString = color.rgbString,
     rgb = color.rgb
 
 // HSL(A) for use with CSS
