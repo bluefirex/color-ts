@@ -427,6 +427,17 @@ export class Color {
         ];
     }
     /**
+     * Get the RGB values as a string "R, G, B"
+     * Useful e.g. for v-bind in Vite, like this:
+     * rgba(v-bind("someColor.rgbString"), 0.5)
+     *
+     * @returns {string}
+     */
+    get rgbString() {
+        const rgb = this.rgb;
+        return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+    }
+    /**
      * Get as HSL object
      * @returns {HSL}
      */

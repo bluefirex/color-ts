@@ -260,6 +260,14 @@ export declare class Color {
      */
     get rgbArray(): [number, number, number];
     /**
+     * Get the RGB values as a string "R, G, B"
+     * Useful e.g. for v-bind in Vite, like this:
+     * rgba(v-bind("someColor.rgbString"), 0.5)
+     *
+     * @returns {string}
+     */
+    get rgbString(): string;
+    /**
      * Get as HSL object
      * @returns {HSL}
      */
