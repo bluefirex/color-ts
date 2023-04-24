@@ -377,6 +377,33 @@ export class Color {
         }
         return false;
     }
+    /**
+     * Is this color white?
+     *
+     * @returns {boolean}
+     */
+    isWhite() {
+        return this.hsl.s == 1 && this.hsl.l == 1;
+    }
+    /**
+     * Is this color black?
+     *
+     * @returns {boolean}
+     */
+    isBlack() {
+        return this.hsl.s == 0 && this.hsl.l == 0;
+    }
+    /**
+     * Is this color similar to another color?
+     *
+     * @param {Color}   color
+     * @param {number}  accuracy    How close the colors have to be, 0-1
+     *
+     * @returns {boolean}
+     */
+    isSimilarTo(color, accuracy = 0.99) {
+        return Color.areSimilar(this, color, accuracy);
+    }
     // Getters
     /**
      * Get as hex string without leading #
@@ -601,6 +628,20 @@ export class Color {
             return null;
         }
         return normalized;
+    }
+    /**
+     * Check whether two colors are similar to each other
+     *
+     * @param {Color}   color1
+     * @param {Color}   color2
+     * @param {number}  accuracy    How close the colors have to be, 0-1
+     *
+     * @returns {boolean}
+     */
+    static areSimilar(color1, color2, accuracy = 0.99) {
+        const hueDiff = Math.abs(color1.hsl.h - color2.hsl.h), satDiff = Math.abs(color1.hsl.s - color2.hsl.s), lightDiff = Math.abs(color1.hsl.l - color2.hsl.l);
+        const invertedAccuracy = 1 - accuracy;
+        return hueDiff <= invertedAccuracy && satDiff <= invertedAccuracy && lightDiff <= invertedAccuracy;
     }
     toJSON() {
         if (this.rgbContainer) {

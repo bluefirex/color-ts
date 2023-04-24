@@ -232,6 +232,27 @@ export declare class Color {
      */
     isGreenish(): boolean;
     /**
+     * Is this color white?
+     *
+     * @returns {boolean}
+     */
+    isWhite(): boolean;
+    /**
+     * Is this color black?
+     *
+     * @returns {boolean}
+     */
+    isBlack(): boolean;
+    /**
+     * Is this color similar to another color?
+     *
+     * @param {Color}   color
+     * @param {number}  accuracy    How close the colors have to be, 0-1
+     *
+     * @returns {boolean}
+     */
+    isSimilarTo(color: Color, accuracy?: number): boolean;
+    /**
      * Get as hex string without leading #
      * @returns {string}
      */
@@ -322,6 +343,16 @@ export declare class Color {
      * @returns {string}
      */
     static normalizeHex(source: string): string | null;
+    /**
+     * Check whether two colors are similar to each other
+     *
+     * @param {Color}   color1
+     * @param {Color}   color2
+     * @param {number}  accuracy    How close the colors have to be, 0-1
+     *
+     * @returns {boolean}
+     */
+    static areSimilar(color1: Color, color2: Color, accuracy?: number): boolean;
     toString: () => string;
     toJSON(): {
         [key: string]: string | number;
