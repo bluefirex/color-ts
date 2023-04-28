@@ -484,7 +484,7 @@ export class Color {
 	 * @returns {boolean}
 	 */
 	public isWhite() {
-		return this.hsl.s == 1 && this.hsl.l == 1
+		return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 1
 	}
 	
 	/**
@@ -493,7 +493,7 @@ export class Color {
 	 * @returns {boolean}
 	 */
 	public isBlack() {
-		return this.hsl.s == 0 && this.hsl.l == 0
+		return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 0
 	}
 	
 	/**
