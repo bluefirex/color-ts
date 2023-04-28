@@ -383,7 +383,7 @@ export class Color {
      * @returns {boolean}
      */
     isWhite() {
-        return this.hsl.s == 1 && this.hsl.l == 1;
+        return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 1;
     }
     /**
      * Is this color black?
@@ -391,7 +391,7 @@ export class Color {
      * @returns {boolean}
      */
     isBlack() {
-        return this.hsl.s == 0 && this.hsl.l == 0;
+        return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 0;
     }
     /**
      * Is this color similar to another color?
