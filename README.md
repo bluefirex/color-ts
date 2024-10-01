@@ -181,3 +181,11 @@ const mixedA = colorA.mixWith(colorB, 25)
 // Option B:
 const mixedB = Color.mix(colorA, colorB, 25)
 ```
+
+## Development
+
+1. Clone repo: `git clone git@github.com:bluefirex/color-ts`
+2. Install dependencies (only vitest and vite): `npm i`
+3. Make your changes.
+4. Run tests: `npm run test`
+5. Run build: `npm run build` (do not commit build files unless they are to be released)
