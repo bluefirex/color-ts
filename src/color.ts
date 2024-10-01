@@ -157,7 +157,7 @@ export class Color {
 		}
 		
 		let type = Color.detectType(str)
-		let stringMatches
+		let stringMatches: string[]
 		
 		switch (type) {
 			case ColorType.hex:
@@ -177,7 +177,7 @@ export class Color {
 				})
 			
 			case ColorType.hsla:
-				stringMatches= str.match(/hsla\(([\d.]+), ?([\d.]+)%, ?([\d.]+)%, ?([\d.]+)\)/)
+				stringMatches = str.match(/hsla\(([\d.]+), ?([\d.]+)%, ?([\d.]+)%, ?([\d.]+%?)\)/)
 				
 				if (!stringMatches) {
 					return null
@@ -187,7 +187,7 @@ export class Color {
 					h: (parseInt(stringMatches[1]) % 360) / 360,
 					s: parseFloat(stringMatches[2]) / 100,
 					l: parseFloat(stringMatches[3]) / 100
-				}, parseFloat(stringMatches[4]))
+				}, this.parseAlpha(stringMatches[4]))
 			
 			case ColorType.rgb:
 				stringMatches = str.match(/rgb\((\d+), ?(\d+), ?(\d+)\)/)
@@ -203,7 +203,7 @@ export class Color {
 				})
 			
 			case ColorType.rgba:
-				stringMatches = str.match(/rgba\((\d+), ?(\d+), ?(\d+), ?([\d.]+)\)/)
+				stringMatches = str.match(/rgba\((\d+), ?(\d+), ?(\d+), ?([\d.]+%?)\)/)
 				
 				if (!stringMatches) {
 					return null
@@ -213,11 +213,23 @@ export class Color {
 					r: parseInt(stringMatches[1]),
 					g: parseInt(stringMatches[2]),
 					b: parseInt(stringMatches[3])
-				}, parseFloat(stringMatches[4]))
+				}, this.parseAlpha(stringMatches[4]))
 			
 			default:
 				return null
 		}
+	}
+	
+	/**
+	 * Parse a numeric string or percentage into a number
+	 * e.g.: "0.1", "10%" -> 0.1
+	 */
+	private static parseAlpha(match: string): number {
+		if (match.endsWith('%')) {
+			return parseFloat(match.substring(0, match.length - 1)) / 100
+		}
+		
+		return parseFloat(match)
 	}
 	
 	/**
