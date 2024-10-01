@@ -35,6 +35,10 @@ console.log(color.cssHSLA, color.cssRGBA, color.cssHex)
 
 - For RGB, numbers range from 0-255
 - For HSL, numbers range from 0-1
+- For YUV:
+  - Y: from 16-235
+  - U: from 16-240
+  - V: from 16-240
 
 ### Create for different formats
 
@@ -161,6 +165,9 @@ const hsla = color.cssHSLA
 // HSL as an object or array
 const hslArray = color.hslArray,
 	hsl = color.hsl
+
+// YUV for approximating human-like color perception
+const yuv = color.yuv
 
 // To and from JSON
 const json = color.toJSON(),
