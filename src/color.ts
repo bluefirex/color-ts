@@ -832,7 +832,7 @@ export class Color {
 	}
 	
 	/**
-	 * Check whether two colors are similar to each other
+	 * Check whether two colors are similar to each other, based on their YUV representation
 	 *
 	 * @param {Color}   color1
 	 * @param {Color}   color2
@@ -841,13 +841,13 @@ export class Color {
 	 * @returns {boolean}
 	 */
 	static areSimilar(color1: Color, color2: Color, accuracy: number = 0.99): boolean {
-		const hueDiff = Math.abs(color1.hsl.h - color2.hsl.h),
-			satDiff = Math.abs(color1.hsl.s - color2.hsl.s),
-			lightDiff = Math.abs(color1.hsl.l - color2.hsl.l)
+		const yDiff = Math.abs(color1.yuv.y - color2.yuv.y),
+			uDiff = Math.abs(color1.yuv.u - color2.yuv.u),
+			vDiff = Math.abs(color1.yuv.v - color2.yuv.v)
 		
 		const invertedAccuracy = 1 - accuracy
 		
-		return hueDiff <= invertedAccuracy && satDiff <= invertedAccuracy && lightDiff <= invertedAccuracy
+		return yDiff <= invertedAccuracy && uDiff <= invertedAccuracy && vDiff <= invertedAccuracy
 	}
 	
 	public toString = () => {
