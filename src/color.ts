@@ -752,6 +752,11 @@ export class Color {
 		// Remove hex sign
 		if (normalized.charAt(0) == '#') {
 			normalized = normalized.substring(1, normalized.length)
+			
+			if (normalized.charAt(0) == '#') {
+				// If there's still a hash, it's invalid
+				return null
+			}
 		}
 		
 		// If it's now only one char we can't work with that
