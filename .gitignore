@@ -1,5 +1,9 @@
 .DS_Store
 
+# Some generated files
+coverage
+node_modules
+
 # WebStorm
 .idea/**/workspace.xml
 .idea/**/tasks.xml
