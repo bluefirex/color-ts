@@ -79,6 +79,11 @@ export enum ColorType {
 	hex,
 	
 	/**
+	 * Indicates a YUV representation, currently unused as yuv has no CSS string equivalent
+	 */
+	yuv,
+	
+	/**
 	 * Indicates a named color or some other browser-usable color definition, like CSS definitions á la url() or gradients
 	 */
 	str
