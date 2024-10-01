@@ -34,6 +34,9 @@ export interface HSL {
 	l: number
 }
 
+/**
+ * A YUV (YPbPr) color
+ */
 export interface YUV {
 	/**
 	 * Luma, 16 to 235
