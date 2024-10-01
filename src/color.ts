@@ -23,15 +23,30 @@ export interface HSL {
 	/**
 	 * Hue, 0 to 1 relative to 360
 	 */
-	h: number,
+	h: number
 	/**
 	 * Saturation, 0 to 1
 	 */
-	s: number,
+	s: number
 	/**
 	 * Lightness, 0 to 1
 	 */
 	l: number
+}
+
+export interface YUV {
+	/**
+	 * Luma, 16 to 235
+	 */
+	y: number
+	/**
+	 * Blue minus luma, 16 to 240
+	 */
+	u: number
+	/**
+	 * Red minus luma, 16 to 240
+	 */
+	v: number
 }
 
 export enum ColorType {
@@ -83,6 +98,7 @@ export class Color {
 	protected hexContainer: string|null = null
 	protected rgbContainer: RGB|null = null
 	protected hslContainer: HSL|null = null
+	protected yuvContainer: YUV|null = null
 	public alpha: number
 	
 	/**
@@ -97,7 +113,7 @@ export class Color {
 			throw new Error('Invalid hex value: ' + hex)
 		}
 		
-		return new Color(normalizedHex, null, null, 1)
+		return new Color(normalizedHex, null, null, null, 1)
 	}
 	
 	/**
@@ -108,7 +124,7 @@ export class Color {
 	 * @returns {Color}
 	 */
 	public static fromRGB(rgb: RGB, alpha: number = 1): Color {
-		return new Color(null, rgb, null, alpha)
+		return new Color(null, rgb, null, null, alpha)
 	}
 	
 	/**
@@ -118,7 +134,7 @@ export class Color {
 	 * @returns {Color}
 	 */
 	public static fromHSL(hsl: HSL, alpha: number = 1): Color {
-		return new Color(null, null, hsl, alpha)
+		return new Color(null, null, hsl, null, alpha)
 	}
 	
 	/**
@@ -225,6 +241,7 @@ export class Color {
 		hex: string|null = null,
 		rgb: RGB|null = null,
 		hsl: HSL|null = null,
+		yuv: YUV|null = null,
 		alpha: number = 1
 	) {
 		if (!(hex || rgb || hsl)) {
@@ -244,6 +261,12 @@ export class Color {
 				h: hsl.h,
 				s: hsl.s,
 				l: hsl.l,
+			}
+		} else if (yuv) {
+			this.yuvContainer = {
+				y: yuv.y,
+				u: yuv.u,
+				v: yuv.v
 			}
 		}
 		
@@ -519,7 +542,7 @@ export class Color {
 			this.calculateHex()
 		}
 		
-		return this.hexContainer as string
+		return this.hexContainer!
 	}
 	
 	/**
@@ -540,7 +563,7 @@ export class Color {
 			this.calculateRGB()
 		}
 		
-		return this.rgbContainer as RGB
+		return this.rgbContainer!
 	}
 	
 	/**
@@ -586,7 +609,7 @@ export class Color {
 			this.calculateHSL()
 		}
 		
-		return this.hslContainer as HSL
+		return this.hslContainer!
 	}
 	
 	/**
@@ -614,6 +637,17 @@ export class Color {
 			this.hsl.s,
 			this.hsl.l
 		]
+	}
+	
+	/**
+	 * Get as YUV object
+	 */
+	public get yuv(): YUV {
+		if (!this.yuvContainer) {
+			this.calculateYUV()
+		}
+		
+		return this.yuvContainer!
 	}
 	
 	// Calculators
@@ -661,6 +695,18 @@ export class Color {
 		}
 	}
 	
+	protected calculateYUV() {
+		if (this.yuvContainer) {
+			return
+		}
+		
+		if (!this.rgbContainer) {
+			this.calculateRGB()
+		}
+		
+		this.yuvContainer = Color.rgbToYuv(this.rgbContainer)
+	}
+	
 	// Static
 	
 	/**
@@ -689,7 +735,10 @@ export class Color {
 			finalHex += hexCombinedValue
 		}
 		
+		const alpha = color2.alpha + (color1.alpha - color2.alpha) * (weight / 100.0)
+		
 		return Color.fromHex(finalHex)
+		            .withAlpha(alpha)
 	}
 	
 	/**
@@ -971,6 +1020,40 @@ export class Color {
 			r: parseInt(hex.substring(0, 2), 16),
 			g: parseInt(hex.substring(2, 4), 16),
 			b: parseInt(hex.substring(4, 6), 16),
+		}
+	}
+	
+	/**
+	 * Convert YUV to RGB
+	 * Thanks to https://stackoverflow.com/a/17934865/1486930
+	 */
+	static yuvToRgb(yuv: YUV): RGB {
+		let { y, u, v } = yuv
+		y -= 16
+		u -= 128
+		v -= 128
+		
+		return {
+			r: Math.abs(Math.round((1.164 * y             + 1.596 * v) * 255)),
+			g: Math.abs(Math.round((1.164 * y - 0.392 * u - 0.813 * v) * 255)),
+			b: Math.abs(Math.round((1.164 * y + 2.017 * u) * 255))
+		}
+	}
+	
+	/**
+	 * Convert RGB to YUV
+	 * Thanks to https://stackoverflow.com/a/17934865/1486930
+	 */
+	static rgbToYuv(rgb: RGB): YUV {
+		let { r, g, b } = rgb
+		r /= 255
+		g /= 255
+		b /= 255
+		
+		return {
+			y:  0.257 * r + 0.504 * g + 0.098 * b + 16,
+			u: -0.148 * r - 0.291 * g + 0.439 * b + 128,
+			v:  0.439 * r - 0.368 * g - 0.071 * b + 128
 		}
 	}
 	
