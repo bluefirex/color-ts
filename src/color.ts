@@ -312,6 +312,20 @@ export class Color {
 	}
 	
 	/**
+	 * Check if this color is lighter than the passed color
+	 */
+	public isLighterThan(color: Color): boolean {
+		return this.perceivedBrightness > color.perceivedBrightness
+	}
+	
+	/**
+	 * Check if this color is darker than the passed color
+	 */
+	public isDarkerThan(color: Color): boolean {
+		return this.perceivedBrightness < color.perceivedBrightness
+	}
+	
+	/**
 	 * Saturate the color by a certain percentage (0-100), just like in SCSS
 	 */
 	public saturate(percentage: number): Color {
