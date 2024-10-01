@@ -289,10 +289,8 @@ export class Color {
 	
 	/**
 	 * Darken the color by a certain percentage (0-100), just like in SCSS
-	 * @param percentage
-	 * @returns {Color}
 	 */
-	public darken(percentage): Color {
+	public darken(percentage: number): Color {
 		return Color.fromHSL({
 			h: this.hsl.h,
 			s: this.hsl.s,
@@ -302,21 +300,13 @@ export class Color {
 	
 	/**
 	 * Lighten the color by a certain percentage (0-100), just like in SCSS
-	 *
-	 * @param percentage
-	 *
-	 * @returns {Color}
 	 */
-	public lighten(percentage): Color {
+	public lighten(percentage: number): Color {
 		return this.darken(-percentage)
 	}
 	
 	/**
 	 * Saturate the color by a certain percentage (0-100), just like in SCSS
-	 *
-	 * @param percentage
-	 *
-	 * @returns {Color}
 	 */
 	public saturate(percentage: number): Color {
 		return Color.fromHSL({
@@ -328,21 +318,13 @@ export class Color {
 	
 	/**
 	 * Desaturate the color by a certain percentage (0-100), just like in SCSS
-	 *
-	 * @param percentage
-	 *
-	 * @returns {Color}
 	 */
 	public desaturate(percentage: number): Color {
 		return this.saturate(-percentage)
 	}
 	
 	/**
-	 * Shift the hue by a certain amount
-	 *
-	 * @param {number} amount   Amount to shift by, 0-1
-	 *
-	 * @returns {Color}
+	 * Shift the hue by an amount between 0-1
 	 */
 	public shiftHue(amount: number): Color {
 		return Color.fromHSL({
@@ -353,11 +335,7 @@ export class Color {
 	}
 	
 	/**
-	 * Get a clone of this color with an alpha value
-	 *
-	 * @param {number}  alpha    between 0 and 1
-	 *
-	 * @returns {Color}
+	 * Get a clone of this color with an alpha value between 0 and 1
 	 */
 	public withAlpha(alpha: number = 1): Color {
 		let clone = this.clone()
@@ -367,11 +345,7 @@ export class Color {
 	}
 	
 	/**
-	 * Get a clone of this color with a specific hue
-	 *
-	 * @param {number}  hue     between 0 and 1
-	 *
-	 * @returns {Color}
+	 * Get a clone of this color with a specific hue between 0 and 1
 	 */
 	public withHue(hue: number = 0): Color {
 		let clone = this.clone()
@@ -383,11 +357,7 @@ export class Color {
 	}
 	
 	/**
-	 * Get a clone of this color with a specific saturation
-	 *
-	 * @param {number} saturation   between 0 and 1
-	 *
-	 * @returns {Color}
+	 * Get a clone of this color with a specific saturation between 0 and 1
 	 */
 	public withSaturation(saturation: number = 1): Color {
 		let clone = this.clone()
@@ -399,11 +369,7 @@ export class Color {
 	}
 	
 	/**
-	 * Get a clone of this color with a specific lightness
-	 *
-	 * @param {number} lightness    between 0 and 1
-	 *
-	 * @returns {Color}
+	 * Get a clone of this color with a specific lightness between 0 and 1
 	 */
 	public withLightness(lightness: number = 1): Color {
 		let clone = this.clone()
@@ -426,15 +392,14 @@ export class Color {
 	
 	/**
 	 * Get the WCAG contrast ratio to another color
-	 *
-	 * @param {Color} color
-	 *
-	 * @returns {number}
 	 */
 	public contrastTo(color: Color): number {
 		return Color.contrast(this, color)
 	}
 	
+	/**
+	 * Clone this color
+	 */
 	public clone(): Color {
 		return Color.fromHSL(this.hsl, this.alpha)
 	}
@@ -443,16 +408,13 @@ export class Color {
 	 * Return the perceived brightness
 	 * The perceived brightness is the brightness value between 0 and 255
 	 * as perceived by a human in RGB colorspace with alpha = 1.
-	 *
-	 * @return {number}
 	 */
-	public get perceivedBrightness() {
+	public get perceivedBrightness(): number {
 		return 0.2126 * this.rgb.r + 0.7152 * this.rgb.g + 0.0722 * this.rgb.b
 	}
 	
 	/**
 	 * Is this color darker than a defined limit according to human perception?
-	 * @returns {boolean}
 	 */
 	public isDark(): boolean {
 		return this.perceivedBrightness <= 120
@@ -460,7 +422,6 @@ export class Color {
 	
 	/**
 	 * Is this color lighter than a defined limit according to human perception?
-	 * @returns {boolean}
 	 */
 	public isLight(): boolean {
 		return !this.isDark()
@@ -468,8 +429,6 @@ export class Color {
 	
 	/**
 	 * Does the color look red to a human?
-	 *
-	 * @returns {boolean}
 	 */
 	public isRedish(): boolean {
 		let hue = this.hsl.h,
@@ -481,8 +440,9 @@ export class Color {
 			return false
 		}
 		
-		let isReddishHue = hue >= 0 && hue <= 0.072 // left side or one part of the circle
-		                   || hue >= 0.933 // right side or the other part of the circle
+		let isReddishHue =
+			hue >= 0 && hue <= 0.072 // left side or one part of the circle
+		    || hue >= 0.933 // right side or the other part of the circle
 		
 		if (isReddishHue) {
 			return sat > 0.201
@@ -493,10 +453,8 @@ export class Color {
 	
 	/**
 	 * Does the color look green to a human?
-	 *
-	 * @returns {boolean}
 	 */
-	public isGreenish() {
+	public isGreenish(): boolean {
 		let hue = this.hsl.h,
 			sat = this.hsl.s,
 			light = this.hsl.l
@@ -515,26 +473,22 @@ export class Color {
 	
 	/**
 	 * Is this color white?
-	 *
-	 * @returns {boolean}
 	 */
-	public isWhite() {
+	public isWhite(): boolean {
 		return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 1
 	}
 	
 	/**
 	 * Is this color black?
-	 *
-	 * @returns {boolean}
 	 */
-	public isBlack() {
+	public isBlack(): boolean {
 		return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 0
 	}
 	
 	/**
 	 * Is this color similar to another color?
 	 *
-	 * @param {Color}   color
+	 * @param {Color}   color       Color to compare to
 	 * @param {number}  accuracy    How close the colors have to be, 0-1
 	 *
 	 * @returns {boolean}
@@ -547,7 +501,6 @@ export class Color {
 	
 	/**
 	 * Get as hex string without leading #
-	 * @returns {string}
 	 */
 	public get hex(): string {
 		if (!this.hexContainer) {
@@ -559,8 +512,6 @@ export class Color {
 	
 	/**
 	 * Get as a CSS-suitable hex string
-	 *
-	 * @returns {string}
 	 */
 	public get cssHex(): string {
 		return '#' + this.hex
@@ -568,7 +519,6 @@ export class Color {
 	
 	/**
 	 * Get as RGB object
-	 * @returns {RGB}
 	 */
 	public get rgb(): RGB {
 		if (!this.rgbContainer) {
@@ -580,8 +530,6 @@ export class Color {
 	
 	/**
 	 * Get as a CSS-suitable rgba string
-	 *
-	 * @returns {string}
 	 */
 	public get cssRGBA(): string {
 		return 'rgba(' + this.rgb.r + ', ' + this.rgb.g + ', ' + this.rgb.b + ', ' + this.alpha + ')'
@@ -589,8 +537,6 @@ export class Color {
 	
 	/**
 	 * Get the RGB values as a numbers array [R, G, B]
-	 *
-	 * @returns {[number, number, number]}
 	 */
 	public get rgbArray(): [number, number, number] {
 		return [
@@ -604,8 +550,6 @@ export class Color {
 	 * Get the RGB values as a string "R, G, B"
 	 * Useful e.g. for v-bind in Vite, like this:
 	 * rgba(v-bind("someColor.rgbString"), 0.5)
-	 *
-	 * @returns {string}
 	 */
 	public get rgbString(): string {
 		const rgb = this.rgb
@@ -614,7 +558,6 @@ export class Color {
 	
 	/**
 	 * Get as HSL object
-	 * @returns {HSL}
 	 */
 	public get hsl(): HSL {
 		if (!this.hslContainer) {
@@ -626,8 +569,6 @@ export class Color {
 	
 	/**
 	 * Get as a CSS-suitable hsla string
-	 *
-	 * @returns {string}
 	 */
 	public get cssHSLA(): string {
 		return 'hsla(' +
@@ -640,8 +581,6 @@ export class Color {
 	
 	/**
 	 * Get the HSL values as a numbers array [H, S, L]
-	 *
-	 * @returns {[number, number, number]}
 	 */
 	public get hslArray(): [number, number, number] {
 		return [
@@ -713,6 +652,7 @@ export class Color {
 		}
 		
 		if (!this.rgbContainer) {
+			// Easiest conversion is from RGB, so calculate that first
 			this.calculateRGB()
 		}
 		
@@ -724,11 +664,11 @@ export class Color {
 	/**
 	 * Mix two colors like SCSS' mix() function, ignores alpha completely
 	 *
-	 * @param color1 Hex Color 1
-	 * @param color2 Hex Color 2
-	 * @param weight Percentage from 0 to 100
+	 * @param {Color}   color1  Hex Color 1
+	 * @param {Color}   color2  Hex Color 2
+	 * @param {number}  weight  Percentage from 0 to 100
 	 */
-	static mix(color1: Color, color2: Color, weight = 50): Color {
+	static mix(color1: Color, color2: Color, weight: number = 50): Color {
 		let finalHex = ''
 		
 		for (let i = 0; i <= 5; i += 2) {
@@ -758,11 +698,11 @@ export class Color {
 	 * Thanks to http://stackoverflow.com/a/13542669/1486930 for this piece of code.
 	 * Ignores alpha.
 	 *
-	 * @param {Number}            p  Percentage to blend, negative means darken, positive means lighten
-	 * @param {Color}             c0 Color to blend
-	 * @param {Color = undefined} c1 Color to blend in, optional
+	 * @param {Number}  p   Percentage to blend, negative means darken, positive means lighten
+	 * @param {Color}   c0  Color to blend
+	 * @param {Color}   c1  Color to blend in, optional
 	 */
-	static shadeBlend(p, c0: Color, c1: Color) {
+	static shadeBlend(p: number, c0: Color, c1: Color): Color {
 		let n = p < 0 ? p * -1 : p,
 			u = Math.round,
 			w = parseInt
@@ -783,11 +723,6 @@ export class Color {
 	
 	/**
 	 * Get the WCAG contrast ratio between two colors
-	 *
-	 * @param {Color} c0
-	 * @param {Color} c1
-	 *
-	 * @returns {number}
 	 */
 	static contrast(c0: Color, c1: Color): number {
 		const lum1 = c0.perceivedBrightness,
@@ -800,10 +735,6 @@ export class Color {
 	
 	/**
 	 * Normalize a hex color into a 6-digit hex value without leading hash symbol
-	 *
-	 * @param {string} source
-	 *
-	 * @returns {string}
 	 */
 	static normalizeHex(source: string): string|null {
 		if (!source || !source.length || source.match(/[G-Zg-z]+/)) {
@@ -862,7 +793,14 @@ export class Color {
 		return yDiff <= invertedAccuracy && uDiff <= invertedAccuracy && vDiff <= invertedAccuracy
 	}
 	
-	public toString = () => {
+	/**
+	 * Convert this color into a string
+	 * Uses whatever format is available in this priority:
+	 * - cssHSLA
+	 * - cssRGBA
+	 * - cssHex
+	 */
+	public toString = (): string => {
 		if (this.hslContainer) {
 			return this.cssHSLA
 		} else if (this.rgbContainer) {
@@ -875,6 +813,15 @@ export class Color {
 		return this.cssHSLA
 	}
 	
+	/**
+	 * Convert this color into an object for use as JSON
+	 * Uses whatever format is available in this priority:
+	 * - HSLA
+	 * - RGBA
+	 * - Hex
+	 *
+	 * Use {@link Color.fromJSON} to restore from JSON
+	 */
 	public toJSON(): { [key: string]: string | number } {
 		if (this.rgbContainer) {
 			return {
@@ -893,12 +840,15 @@ export class Color {
 		}
 	}
 	
-	static fromJSON(json: string | { [key: string]: string | number }): Color|null {
+	/**
+	 * Restore an instance of {@link Color} from a JSON object created by {@link Color.toJSON}
+	 */
+	static fromJSON(json: string | Record<string, string | number>): Color|null {
 		if (!json) {
 			return null
 		}
 		
-		let parsed
+		let parsed: any
 		
 		if (typeof (json) == 'string') {
 			parsed = JSON.parse(json)
@@ -921,8 +871,6 @@ export class Color {
 	
 	/**
 	 * Convert RGB to HSL
-	 * @param {RGB} rgb
-	 * @returns {HSL}
 	 */
 	static rgbToHsl(rgb: RGB): HSL {
 		let {r, g, b} = rgb
@@ -932,7 +880,7 @@ export class Color {
 		b /= 255
 		
 		let max = Math.max(r, g, b), min = Math.min(r, g, b)
-		let h, s, l = (max + min) / 2
+		let h: number, s: number, l = (max + min) / 2
 		
 		if (max == min) {
 			h = s = 0 // achromatic
@@ -954,8 +902,6 @@ export class Color {
 	
 	/**
 	 * Convert rgb to a hex string without leading #
-	 * @param {RGB} rgb Color
-	 * @returns {string} without #
 	 */
 	static rgbToHex(rgb: RGB): string {
 		return rgb.r.toString(16).padStart(2, '0') +
@@ -965,8 +911,6 @@ export class Color {
 	
 	/**
 	 * Convert hex (with or without leading #) to HSL
-	 * @param {string} hex
-	 * @returns {HSL}
 	 */
 	static hexToHsl(hex: string): HSL {
 		if (!hex) {
@@ -984,16 +928,14 @@ export class Color {
 	
 	/**
 	 * Convert HSL to RGB
-	 * @param {HSL} hsl
-	 * @returns {RGB}
 	 */
 	static hslToRgb(hsl: HSL): RGB {
-		let r, g, b
+		let r: number, g: number, b: number
 		
 		if (hsl.s == 0) {
 			r = g = b = hsl.l // achromatic
 		} else {
-			let hue2rgb = (p, q, t) => {
+			let hue2rgb = (p: number, q: number, t: number) => {
 				if (t < 0) t += 1
 				if (t > 1) t -= 1
 				if (t < 1/6) return p + (q - p) * 6 * t
@@ -1020,8 +962,6 @@ export class Color {
 	
 	/**
 	 * Convert hex (with or without leading #) to RGB
-	 * @param {string} hex
-	 * @returns {RGB}
 	 */
 	static hexToRgb(hex: string): RGB {
 		if (hex.charAt(0) == '#') {
