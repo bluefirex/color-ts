@@ -182,6 +182,25 @@ const mixedA = colorA.mixWith(colorB, 25)
 const mixedB = Color.mix(colorA, colorB, 25)
 ```
 
+#### Check if two colors are similar
+
+```ts
+const colorA = Color.fromString('#272727'),
+	colorB = Color.fromString('#282828')
+
+console.log(colorA.isSimilarTo(colorB, 0.95)) // true
+```
+
+#### Compare lightness of two colors
+
+```ts
+const colorA = Color.fromString('#272727'),
+	colorB = Color.fromString('#282828')
+
+console.log(colorA.isLighterThan(colorB)) // false
+console.log(colorA.isDarkerThan(colorB)) // true
+```
+
 ## Development
 
 1. Clone repo: `git clone git@github.com:bluefirex/color-ts`
