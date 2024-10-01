@@ -348,7 +348,7 @@ export class Color {
 	 */
 	public shiftHue(amount: number): Color {
 		return Color.fromHSL({
-			h: (this.hsl.h + amount) % 1,
+			h: Color.modulo(this.hsl.h + amount, 1),
 			s: this.hsl.s,
 			l: this.hsl.l
 		}, this.alpha)
@@ -1064,5 +1064,9 @@ export class Color {
 		} else {
 			return ColorType.str
 		}
+	}
+	
+	private static modulo(n: number, m: number): number {
+		return ((n % m) + m) % m
 	}
 }
