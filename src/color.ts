@@ -111,8 +111,6 @@ export class Color {
 	
 	/**
 	 * Create a color from a hex string, with or without leading #
-	 * @param {string} hex
-	 * @returns {Color}
 	 */
 	public static fromHex(hex: string): Color {
 		let normalizedHex = Color.normalizeHex(hex)
@@ -126,10 +124,6 @@ export class Color {
 	
 	/**
 	 * Create a color from an RGB object
-	 * @param {RGB}    rgb
-	 * @param {number} alpha
-	 *
-	 * @returns {Color}
 	 */
 	public static fromRGB(rgb: RGB, alpha: number = 1): Color {
 		return new Color(null, rgb, null, null, alpha)
@@ -137,12 +131,16 @@ export class Color {
 	
 	/**
 	 * Create a color from an HSL object
-	 * @param {HSL}    hsl
-	 * @param {number} alpha
-	 * @returns {Color}
 	 */
 	public static fromHSL(hsl: HSL, alpha: number = 1): Color {
 		return new Color(null, null, hsl, null, alpha)
+	}
+	
+	/**
+	 * Create a color from an YUV object
+	 */
+	public static fromYUV(yuv: YUV, alpha: number = 1): Color {
+		return new Color(null, null, null, yuv, alpha)
 	}
 	
 	/**
@@ -264,7 +262,7 @@ export class Color {
 		yuv: YUV|null = null,
 		alpha: number = 1
 	) {
-		if (!(hex || rgb || hsl)) {
+		if (!(hex || rgb || hsl || yuv)) {
 			throw new Error('One component must be set')
 		}
 		
