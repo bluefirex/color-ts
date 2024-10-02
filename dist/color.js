@@ -21,9 +21,13 @@ export var ColorType;
      */
     ColorType[ColorType["hex"] = 4] = "hex";
     /**
+     * Indicates a YUV representation, currently unused as yuv has no CSS string equivalent
+     */
+    ColorType[ColorType["yuv"] = 5] = "yuv";
+    /**
      * Indicates a named color or some other browser-usable color definition, like CSS definitions á la url() or gradients
      */
-    ColorType[ColorType["str"] = 5] = "str";
+    ColorType[ColorType["str"] = 6] = "str";
 })(ColorType || (ColorType = {}));
 /**
  * A class for working with colors
@@ -33,10 +37,18 @@ export var ColorType;
  * @author bluefirex
  */
 export class Color {
-    constructor(hex = null, rgb = null, hsl = null, alpha = 1) {
+    constructor(hex = null, rgb = null, hsl = null, yuv = null, alpha = 1) {
         this.hexContainer = null;
         this.rgbContainer = null;
         this.hslContainer = null;
+        this.yuvContainer = null;
+        /**
+         * Convert this color into a string
+         * Uses whatever format is available in this priority:
+         * - cssHSLA
+         * - cssRGBA
+         * - cssHex
+         */
         this.toString = () => {
             if (this.hslContainer) {
                 return this.cssHSLA;
@@ -50,7 +62,7 @@ export class Color {
             // Otherwise, force calculate HSLA and wonder how the fuck we got here…
             return this.cssHSLA;
         };
-        if (!(hex || rgb || hsl)) {
+        if (!(hex || rgb || hsl || yuv)) {
             throw new Error('One component must be set');
         }
         if (hex) {
@@ -70,38 +82,42 @@ export class Color {
                 l: hsl.l,
             };
         }
+        else if (yuv) {
+            this.yuvContainer = {
+                y: yuv.y,
+                u: yuv.u,
+                v: yuv.v
+            };
+        }
         this.alpha = alpha;
     }
     /**
      * Create a color from a hex string, with or without leading #
-     * @param {string} hex
-     * @returns {Color}
      */
     static fromHex(hex) {
         let normalizedHex = Color.normalizeHex(hex);
         if (!normalizedHex) {
             throw new Error('Invalid hex value: ' + hex);
         }
-        return new Color(normalizedHex, null, null, 1);
+        return new Color(normalizedHex, null, null, null, 1);
     }
     /**
      * Create a color from an RGB object
-     * @param {RGB}    rgb
-     * @param {number} alpha
-     *
-     * @returns {Color}
      */
     static fromRGB(rgb, alpha = 1) {
-        return new Color(null, rgb, null, alpha);
+        return new Color(null, rgb, null, null, alpha);
     }
     /**
      * Create a color from an HSL object
-     * @param {HSL}    hsl
-     * @param {number} alpha
-     * @returns {Color}
      */
     static fromHSL(hsl, alpha = 1) {
-        return new Color(null, null, hsl, alpha);
+        return new Color(null, null, hsl, null, alpha);
+    }
+    /**
+     * Create a color from an YUV object
+     */
+    static fromYUV(yuv, alpha = 1) {
+        return new Color(null, null, null, yuv, alpha);
     }
     /**
      * Create a color object from a string
@@ -136,7 +152,7 @@ export class Color {
                     l: parseFloat(stringMatches[3]) / 100
                 });
             case ColorType.hsla:
-                stringMatches = str.match(/hsla\(([\d.]+), ?([\d.]+)%, ?([\d.]+)%, ?([\d.]+)\)/);
+                stringMatches = str.match(/hsla\(([\d.]+), ?([\d.]+)%, ?([\d.]+)%, ?([\d.]+%?)\)/);
                 if (!stringMatches) {
                     return null;
                 }
@@ -144,7 +160,7 @@ export class Color {
                     h: (parseInt(stringMatches[1]) % 360) / 360,
                     s: parseFloat(stringMatches[2]) / 100,
                     l: parseFloat(stringMatches[3]) / 100
-                }, parseFloat(stringMatches[4]));
+                }, this.parseAlpha(stringMatches[4]));
             case ColorType.rgb:
                 stringMatches = str.match(/rgb\((\d+), ?(\d+), ?(\d+)\)/);
                 if (!stringMatches) {
@@ -156,7 +172,7 @@ export class Color {
                     b: parseInt(stringMatches[3])
                 });
             case ColorType.rgba:
-                stringMatches = str.match(/rgba\((\d+), ?(\d+), ?(\d+), ?([\d.]+)\)/);
+                stringMatches = str.match(/rgba\((\d+), ?(\d+), ?(\d+), ?([\d.]+%?)\)/);
                 if (!stringMatches) {
                     return null;
                 }
@@ -164,10 +180,20 @@ export class Color {
                     r: parseInt(stringMatches[1]),
                     g: parseInt(stringMatches[2]),
                     b: parseInt(stringMatches[3])
-                }, parseFloat(stringMatches[4]));
+                }, this.parseAlpha(stringMatches[4]));
             default:
                 return null;
         }
+    }
+    /**
+     * Parse a numeric string or percentage into a number
+     * e.g.: "0.1", "10%" -> 0.1
+     */
+    static parseAlpha(match) {
+        if (match.endsWith('%')) {
+            return parseFloat(match.substring(0, match.length - 1)) / 100;
+        }
+        return parseFloat(match);
     }
     /**
      * Get a random color (RGB 0, 0, 0 to RGB 255, 255, 255)
@@ -185,8 +211,6 @@ export class Color {
     // Operations
     /**
      * Darken the color by a certain percentage (0-100), just like in SCSS
-     * @param percentage
-     * @returns {Color}
      */
     darken(percentage) {
         return Color.fromHSL({
@@ -197,20 +221,24 @@ export class Color {
     }
     /**
      * Lighten the color by a certain percentage (0-100), just like in SCSS
-     *
-     * @param percentage
-     *
-     * @returns {Color}
      */
     lighten(percentage) {
         return this.darken(-percentage);
     }
     /**
+     * Check if this color is lighter than the passed color
+     */
+    isLighterThan(color) {
+        return this.perceivedBrightness > color.perceivedBrightness;
+    }
+    /**
+     * Check if this color is darker than the passed color
+     */
+    isDarkerThan(color) {
+        return this.perceivedBrightness < color.perceivedBrightness;
+    }
+    /**
      * Saturate the color by a certain percentage (0-100), just like in SCSS
-     *
-     * @param percentage
-     *
-     * @returns {Color}
      */
     saturate(percentage) {
         return Color.fromHSL({
@@ -221,34 +249,22 @@ export class Color {
     }
     /**
      * Desaturate the color by a certain percentage (0-100), just like in SCSS
-     *
-     * @param percentage
-     *
-     * @returns {Color}
      */
     desaturate(percentage) {
         return this.saturate(-percentage);
     }
     /**
-     * Shift the hue by a certain amount
-     *
-     * @param {number} amount   Amount to shift by, 0-1
-     *
-     * @returns {Color}
+     * Shift the hue by an amount between 0-1
      */
     shiftHue(amount) {
         return Color.fromHSL({
-            h: (this.hsl.h + amount) % 1,
+            h: Color.modulo(this.hsl.h + amount, 1),
             s: this.hsl.s,
             l: this.hsl.l
         }, this.alpha);
     }
     /**
-     * Get a clone of this color with an alpha value
-     *
-     * @param {number}  alpha    between 0 and 1
-     *
-     * @returns {Color}
+     * Get a clone of this color with an alpha value between 0 and 1
      */
     withAlpha(alpha = 1) {
         let clone = this.clone();
@@ -256,11 +272,7 @@ export class Color {
         return clone;
     }
     /**
-     * Get a clone of this color with a specific hue
-     *
-     * @param {number}  hue     between 0 and 1
-     *
-     * @returns {Color}
+     * Get a clone of this color with a specific hue between 0 and 1
      */
     withHue(hue = 0) {
         let clone = this.clone();
@@ -270,11 +282,7 @@ export class Color {
         return clone;
     }
     /**
-     * Get a clone of this color with a specific saturation
-     *
-     * @param {number} saturation   between 0 and 1
-     *
-     * @returns {Color}
+     * Get a clone of this color with a specific saturation between 0 and 1
      */
     withSaturation(saturation = 1) {
         let clone = this.clone();
@@ -284,11 +292,7 @@ export class Color {
         return clone;
     }
     /**
-     * Get a clone of this color with a specific lightness
-     *
-     * @param {number} lightness    between 0 and 1
-     *
-     * @returns {Color}
+     * Get a clone of this color with a specific lightness between 0 and 1
      */
     withLightness(lightness = 1) {
         let clone = this.clone();
@@ -308,14 +312,13 @@ export class Color {
     }
     /**
      * Get the WCAG contrast ratio to another color
-     *
-     * @param {Color} color
-     *
-     * @returns {number}
      */
     contrastTo(color) {
         return Color.contrast(this, color);
     }
+    /**
+     * Clone this color
+     */
     clone() {
         return Color.fromHSL(this.hsl, this.alpha);
     }
@@ -323,30 +326,24 @@ export class Color {
      * Return the perceived brightness
      * The perceived brightness is the brightness value between 0 and 255
      * as perceived by a human in RGB colorspace with alpha = 1.
-     *
-     * @return {number}
      */
     get perceivedBrightness() {
         return 0.2126 * this.rgb.r + 0.7152 * this.rgb.g + 0.0722 * this.rgb.b;
     }
     /**
      * Is this color darker than a defined limit according to human perception?
-     * @returns {boolean}
      */
     isDark() {
         return this.perceivedBrightness <= 120;
     }
     /**
      * Is this color lighter than a defined limit according to human perception?
-     * @returns {boolean}
      */
     isLight() {
         return !this.isDark();
     }
     /**
      * Does the color look red to a human?
-     *
-     * @returns {boolean}
      */
     isRedish() {
         let hue = this.hsl.h, sat = this.hsl.s, light = this.hsl.l;
@@ -363,8 +360,6 @@ export class Color {
     }
     /**
      * Does the color look green to a human?
-     *
-     * @returns {boolean}
      */
     isGreenish() {
         let hue = this.hsl.h, sat = this.hsl.s, light = this.hsl.l;
@@ -379,16 +374,12 @@ export class Color {
     }
     /**
      * Is this color white?
-     *
-     * @returns {boolean}
      */
     isWhite() {
         return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 1;
     }
     /**
      * Is this color black?
-     *
-     * @returns {boolean}
      */
     isBlack() {
         return (this.hsl.s == 1 || this.hsl.s == 0) && this.hsl.l == 0;
@@ -396,7 +387,7 @@ export class Color {
     /**
      * Is this color similar to another color?
      *
-     * @param {Color}   color
+     * @param {Color}   color       Color to compare to
      * @param {number}  accuracy    How close the colors have to be, 0-1
      *
      * @returns {boolean}
@@ -407,7 +398,6 @@ export class Color {
     // Getters
     /**
      * Get as hex string without leading #
-     * @returns {string}
      */
     get hex() {
         if (!this.hexContainer) {
@@ -417,15 +407,12 @@ export class Color {
     }
     /**
      * Get as a CSS-suitable hex string
-     *
-     * @returns {string}
      */
     get cssHex() {
         return '#' + this.hex;
     }
     /**
      * Get as RGB object
-     * @returns {RGB}
      */
     get rgb() {
         if (!this.rgbContainer) {
@@ -435,16 +422,12 @@ export class Color {
     }
     /**
      * Get as a CSS-suitable rgba string
-     *
-     * @returns {string}
      */
     get cssRGBA() {
         return 'rgba(' + this.rgb.r + ', ' + this.rgb.g + ', ' + this.rgb.b + ', ' + this.alpha + ')';
     }
     /**
      * Get the RGB values as a numbers array [R, G, B]
-     *
-     * @returns {[number, number, number]}
      */
     get rgbArray() {
         return [
@@ -457,8 +440,6 @@ export class Color {
      * Get the RGB values as a string "R, G, B"
      * Useful e.g. for v-bind in Vite, like this:
      * rgba(v-bind("someColor.rgbString"), 0.5)
-     *
-     * @returns {string}
      */
     get rgbString() {
         const rgb = this.rgb;
@@ -466,7 +447,6 @@ export class Color {
     }
     /**
      * Get as HSL object
-     * @returns {HSL}
      */
     get hsl() {
         if (!this.hslContainer) {
@@ -476,8 +456,6 @@ export class Color {
     }
     /**
      * Get as a CSS-suitable hsla string
-     *
-     * @returns {string}
      */
     get cssHSLA() {
         return 'hsla(' +
@@ -489,8 +467,6 @@ export class Color {
     }
     /**
      * Get the HSL values as a numbers array [H, S, L]
-     *
-     * @returns {[number, number, number]}
      */
     get hslArray() {
         return [
@@ -498,6 +474,15 @@ export class Color {
             this.hsl.s,
             this.hsl.l
         ];
+    }
+    /**
+     * Get as YUV object
+     */
+    get yuv() {
+        if (!this.yuvContainer) {
+            this.calculateYUV();
+        }
+        return this.yuvContainer;
     }
     // Calculators
     calculateHex() {
@@ -543,13 +528,23 @@ export class Color {
             throw new Error('Could not calculate HSL values');
         }
     }
+    calculateYUV() {
+        if (this.yuvContainer) {
+            return;
+        }
+        if (!this.rgbContainer) {
+            // Easiest conversion is from RGB, so calculate that first
+            this.calculateRGB();
+        }
+        this.yuvContainer = Color.rgbToYuv(this.rgbContainer);
+    }
     // Static
     /**
      * Mix two colors like SCSS' mix() function, ignores alpha completely
      *
-     * @param color1 Hex Color 1
-     * @param color2 Hex Color 2
-     * @param weight Percentage from 0 to 100
+     * @param {Color}   color1  Hex Color 1
+     * @param {Color}   color2  Hex Color 2
+     * @param {number}  weight  Percentage from 0 to 100
      */
     static mix(color1, color2, weight = 50) {
         let finalHex = '';
@@ -563,16 +558,18 @@ export class Color {
             }
             finalHex += hexCombinedValue;
         }
-        return Color.fromHex(finalHex);
+        const alpha = color2.alpha + (color1.alpha - color2.alpha) * (weight / 100.0);
+        return Color.fromHex(finalHex)
+            .withAlpha(alpha);
     }
     /**
      * Shade blend two colors with a given percentage
      * Thanks to http://stackoverflow.com/a/13542669/1486930 for this piece of code.
      * Ignores alpha.
      *
-     * @param {Number}            p  Percentage to blend, negative means darken, positive means lighten
-     * @param {Color}             c0 Color to blend
-     * @param {Color = undefined} c1 Color to blend in, optional
+     * @param {Number}  p   Percentage to blend, negative means darken, positive means lighten
+     * @param {Color}   c0  Color to blend
+     * @param {Color}   c1  Color to blend in, optional
      */
     static shadeBlend(p, c0, c1) {
         let n = p < 0 ? p * -1 : p, u = Math.round, w = parseInt;
@@ -583,11 +580,6 @@ export class Color {
     }
     /**
      * Get the WCAG contrast ratio between two colors
-     *
-     * @param {Color} c0
-     * @param {Color} c1
-     *
-     * @returns {number}
      */
     static contrast(c0, c1) {
         const lum1 = c0.perceivedBrightness, lum2 = c1.perceivedBrightness, brightest = Math.max(lum1, lum2), darkest = Math.min(lum1, lum2);
@@ -595,10 +587,6 @@ export class Color {
     }
     /**
      * Normalize a hex color into a 6-digit hex value without leading hash symbol
-     *
-     * @param {string} source
-     *
-     * @returns {string}
      */
     static normalizeHex(source) {
         if (!source || !source.length || source.match(/[G-Zg-z]+/)) {
@@ -608,6 +596,10 @@ export class Color {
         // Remove hex sign
         if (normalized.charAt(0) == '#') {
             normalized = normalized.substring(1, normalized.length);
+            if (normalized.charAt(0) == '#') {
+                // If there's still a hash, it's invalid
+                return null;
+            }
         }
         // If it's now only one char we can't work with that
         if (normalized.length < 2) {
@@ -630,7 +622,7 @@ export class Color {
         return normalized;
     }
     /**
-     * Check whether two colors are similar to each other
+     * Check whether two colors are similar to each other, based on their YUV representation
      *
      * @param {Color}   color1
      * @param {Color}   color2
@@ -639,10 +631,19 @@ export class Color {
      * @returns {boolean}
      */
     static areSimilar(color1, color2, accuracy = 0.99) {
-        const hueDiff = Math.abs(color1.hsl.h - color2.hsl.h), satDiff = Math.abs(color1.hsl.s - color2.hsl.s), lightDiff = Math.abs(color1.hsl.l - color2.hsl.l);
+        const yDiff = Math.abs(color1.yuv.y - color2.yuv.y), uDiff = Math.abs(color1.yuv.u - color2.yuv.u), vDiff = Math.abs(color1.yuv.v - color2.yuv.v);
         const invertedAccuracy = 1 - accuracy;
-        return hueDiff <= invertedAccuracy && satDiff <= invertedAccuracy && lightDiff <= invertedAccuracy;
+        return yDiff <= invertedAccuracy && uDiff <= invertedAccuracy && vDiff <= invertedAccuracy;
     }
+    /**
+     * Convert this color into an object for use as JSON
+     * Uses whatever format is available in this priority:
+     * - HSLA
+     * - RGBA
+     * - Hex
+     *
+     * Use {@link Color.fromJSON} to restore from JSON
+     */
     toJSON() {
         if (this.rgbContainer) {
             return {
@@ -662,6 +663,9 @@ export class Color {
             };
         }
     }
+    /**
+     * Restore an instance of {@link Color} from a JSON object created by {@link Color.toJSON}
+     */
     static fromJSON(json) {
         if (!json) {
             return null;
@@ -689,8 +693,6 @@ export class Color {
     /* CONVERTERS */
     /**
      * Convert RGB to HSL
-     * @param {RGB} rgb
-     * @returns {HSL}
      */
     static rgbToHsl(rgb) {
         let { r, g, b } = rgb;
@@ -722,8 +724,6 @@ export class Color {
     }
     /**
      * Convert rgb to a hex string without leading #
-     * @param {RGB} rgb Color
-     * @returns {string} without #
      */
     static rgbToHex(rgb) {
         return rgb.r.toString(16).padStart(2, '0') +
@@ -732,8 +732,6 @@ export class Color {
     }
     /**
      * Convert hex (with or without leading #) to HSL
-     * @param {string} hex
-     * @returns {HSL}
      */
     static hexToHsl(hex) {
         if (!hex) {
@@ -748,8 +746,6 @@ export class Color {
     }
     /**
      * Convert HSL to RGB
-     * @param {HSL} hsl
-     * @returns {RGB}
      */
     static hslToRgb(hsl) {
         let r, g, b;
@@ -784,8 +780,6 @@ export class Color {
     }
     /**
      * Convert hex (with or without leading #) to RGB
-     * @param {string} hex
-     * @returns {RGB}
      */
     static hexToRgb(hex) {
         if (hex.charAt(0) == '#') {
@@ -795,6 +789,36 @@ export class Color {
             r: parseInt(hex.substring(0, 2), 16),
             g: parseInt(hex.substring(2, 4), 16),
             b: parseInt(hex.substring(4, 6), 16),
+        };
+    }
+    /**
+     * Convert YUV to RGB
+     * Thanks to https://stackoverflow.com/a/17934865/1486930
+     */
+    static yuvToRgb(yuv) {
+        let { y, u, v } = yuv;
+        y -= 16;
+        u -= 128;
+        v -= 128;
+        return {
+            r: Math.abs(Math.round((1.164 * y + 1.596 * v) * 255)),
+            g: Math.abs(Math.round((1.164 * y - 0.392 * u - 0.813 * v) * 255)),
+            b: Math.abs(Math.round((1.164 * y + 2.017 * u) * 255))
+        };
+    }
+    /**
+     * Convert RGB to YUV
+     * Thanks to https://stackoverflow.com/a/17934865/1486930
+     */
+    static rgbToYuv(rgb) {
+        let { r, g, b } = rgb;
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        return {
+            y: 0.257 * r + 0.504 * g + 0.098 * b + 16,
+            u: -0.148 * r - 0.291 * g + 0.439 * b + 128,
+            v: 0.439 * r - 0.368 * g - 0.071 * b + 128
         };
     }
     /**
@@ -828,6 +852,9 @@ export class Color {
         else {
             return ColorType.str;
         }
+    }
+    static modulo(n, m) {
+        return ((n % m) + m) % m;
     }
 }
 Color.PERCEIVED_BRIGHTNESS_THRESHOLD = 155;
